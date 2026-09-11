@@ -1,8 +1,0 @@
-venv/
-__pycache__/
-*.pyc
-data/
-.env
-mlruns/
-*.pkl
-.DS_Store
