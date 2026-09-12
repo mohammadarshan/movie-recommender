@@ -4,6 +4,7 @@ __pycache__/
 data/
 .env
 mlruns/
+mlartifacts/
 *.pkl
 .DS_Store
 artifacts/
