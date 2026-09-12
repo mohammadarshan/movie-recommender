@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader, random_split
 from src.data.dataset import RatingsDataset
 from src.models.recommender import RecommenderNet
 import mlflow
+import json
 
 # ---- Configure MLflow ----
 mlflow.set_tracking_uri("http://localhost:5000")
@@ -91,3 +92,15 @@ with mlflow.start_run() as run:
 
     # NEW: Log the saved model file as an MLflow artifact
     mlflow.log_artifact(model_path)
+
+    # Save the ID mappings so the API can translate real IDs -> model indices
+    mappings = {
+        "user_to_idx": {str(k): v for k, v in dataset.user_to_idx.items()},
+        "movie_to_idx": {str(k): v for k, v in dataset.movie_to_idx.items()}
+    }
+    mappings_path = "artifacts/mappings.json"
+    with open(mappings_path, "w") as f:
+        json.dump(mappings, f)
+    print("Mappings saved to artifacts/mappings.json")
+
+    mlflow.log_artifact(mappings_path)
