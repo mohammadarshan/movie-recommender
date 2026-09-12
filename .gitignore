@@ -6,3 +6,4 @@ data/
 mlruns/
 *.pkl
 .DS_Store
+artifacts/
