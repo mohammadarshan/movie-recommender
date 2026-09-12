@@ -7,10 +7,19 @@ import torch
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pandas as pd
-
+from sqlalchemy.orm import Session
+from src.db.database import SessionLocal, User
+from src.auth.security import hash_password, verify_password
 from src.models.recommender import RecommenderNet
 
 app = FastAPI(title="Movie Recommender API")
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # ---- Load mappings ----
 with open("artifacts/mappings.json", "r") as f:
@@ -51,6 +60,18 @@ class MovieRecommendation(BaseModel):
 class TopNResponse(BaseModel):
     user_id: str
     recommendations: list[MovieRecommendation]
+
+class RegisterRequest(BaseModel):
+    username: str
+    password: str
+
+class AuthResponse(BaseModel):
+    id: int
+    username: str
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 @app.get("/")
 def root():
@@ -119,3 +140,36 @@ def recommend(request: TopNRequest):
             for movie_id, pred in top_results
         ]
     )
+
+@app.post("/register", response_model=AuthResponse)
+def register(request: RegisterRequest):
+    db = SessionLocal()
+    try:
+        existing_user = db.query(User).filter(User.username == request.username).first()
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Username already exists")
+
+        new_user = User(
+            username=request.username,
+            hashed_password=hash_password(request.password)
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+
+        return AuthResponse(id=new_user.id, username=new_user.username)
+    finally:
+        db.close()
+
+@app.post("/login", response_model=AuthResponse)
+def login(request: LoginRequest):
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.username == request.username).first()
+
+        if not user or not verify_password(request.password, user.hashed_password):
+            raise HTTPException(status_code=401, detail="Invalid username or password")
+
+        return AuthResponse(id=user.id, username=user.username)
+    finally:
+        db.close()
