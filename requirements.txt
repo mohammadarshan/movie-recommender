@@ -1,3 +1,5 @@
 mlflow
 torch
 pandas
+fastapi
+uvicorn
