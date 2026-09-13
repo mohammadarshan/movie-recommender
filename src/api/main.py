@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from src.db.database import SessionLocal, User
 from src.auth.security import hash_password, verify_password
 from src.models.recommender import RecommenderNet
+import random
 
 app = FastAPI(title="Movie Recommender API")
 
@@ -68,6 +69,7 @@ class RegisterRequest(BaseModel):
 class AuthResponse(BaseModel):
     id: int
     username: str
+    movielens_user_id: int
 
 class LoginRequest(BaseModel):
     username: str
@@ -149,15 +151,19 @@ def register(request: RegisterRequest):
         if existing_user:
             raise HTTPException(status_code=400, detail="Username already exists")
 
+        # Assign a random existing MovieLens user ID (demo simplification, see README)
+        assigned_movielens_id = int(random.choice(list(user_to_idx.keys())))
+
         new_user = User(
             username=request.username,
-            hashed_password=hash_password(request.password)
+            hashed_password=hash_password(request.password),
+            movielens_user_id=assigned_movielens_id
         )
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
 
-        return AuthResponse(id=new_user.id, username=new_user.username)
+        return AuthResponse(id=new_user.id, username=new_user.username, movielens_user_id=new_user.movielens_user_id)
     finally:
         db.close()
 
@@ -170,6 +176,6 @@ def login(request: LoginRequest):
         if not user or not verify_password(request.password, user.hashed_password):
             raise HTTPException(status_code=401, detail="Invalid username or password")
 
-        return AuthResponse(id=user.id, username=user.username)
+        return AuthResponse(id=user.id, username=user.username, movielens_user_id=user.movielens_user_id)
     finally:
         db.close()

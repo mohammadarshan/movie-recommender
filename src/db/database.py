@@ -19,6 +19,7 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    movielens_user_id = Column(Integer, nullable=False)
 
 def init_db():
     Base.metadata.create_all(bind=engine)
