@@ -8,12 +8,18 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pandas as pd
 from sqlalchemy.orm import Session
-from src.db.database import SessionLocal, User
+from src.db.database import SessionLocal, User, init_db
 from src.auth.security import hash_password, verify_password
 from src.models.recommender import RecommenderNet
 import random
+from contextlib import asynccontextmanager
 
-app = FastAPI(title="Movie Recommender API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+app = FastAPI(title="Movie Recommender API", lifespan=lifespan)
 
 def get_db():
     db = SessionLocal()
