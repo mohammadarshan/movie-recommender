@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: ['main', 'dev']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
+
+      - name: Check that core modules import correctly
+        run: |
+          python -c "from src.models.recommender import RecommenderNet; print('Model import OK')"
+          python -c "from src.data.dataset import RatingsDataset; print('Dataset import OK')"
+          python -c "from src.db.database import User, init_db; print('Database import OK')"
+
+      - name: Build API Docker image
+        run: docker build -t movie-recommender-api -f Dockerfile .
+
+      - name: Build Frontend Docker image
+        run: docker build -t movie-recommender-frontend -f frontend/Dockerfile .
