@@ -25,6 +25,8 @@ jobs:
           pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
 
       - name: Check that core modules import correctly
+        env:
+          DATABASE_URL: postgresql://postgres:placeholder@localhost:5432/movie_recommender
         run: |
           python -c "from src.models.recommender import RecommenderNet; print('Model import OK')"
           python -c "from src.data.dataset import RatingsDataset; print('Dataset import OK')"
