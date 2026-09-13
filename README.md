@@ -2,7 +2,7 @@
 
 A full-stack movie recommendation system built to demonstrate a complete, production-style ML workflow — from a trained PyTorch model to a containerized, authenticated web application.
 
-**Live demo:** [link coming after deployment]
+**Status:** fully functional and fully containerized; runs anywhere with Docker via a single command (see below). Not currently deployed to a public host — see [Known limitations](#known-limitations--honest-notes).
 
 ---
 
@@ -77,6 +77,7 @@ Then visit:
 
 ## Known limitations & honest notes
 
+- **Deployment:** the app is fully containerized and ready to deploy to any Docker-compatible host (Render, Railway, Fly.io, AWS/GCP/Azure, etc.) with minimal changes — the Dockerfiles, environment-variable-based config, and CI pipeline are already deployment-ready. Public hosting was deferred for this iteration in favor of keeping the local, reproducible workflow solid end-to-end; it's the natural next step.
 - **Cold start:** newly registered users are randomly mapped to an existing MovieLens user ID to enable meaningful demo recommendations. True cold-start handling (recommending to a user with zero history) is a separate, harder problem not solved here.
 - **Experiment tracking runs locally** rather than on a hosted MLflow instance (DagsHub integration attempted but blocked by an SSL certificate issue on their end during development).
 - **CI validates imports and Docker builds**, not a full automated test suite — unit/integration tests are a natural next step.
@@ -84,6 +85,7 @@ Then visit:
 
 ## What I'd add next
 
+- Deploy to a free-tier host (Render/Railway) with managed Postgres
 - Formal unit/integration tests (pytest)
 - A dedicated cold-start strategy (content-based fallback for new users)
 - Hosted MLflow + DVC remote (DagsHub or S3)
