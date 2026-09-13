@@ -8,6 +8,7 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.username = None
     st.session_state.user_id = None
+    st.session_state.movielens_user_id = None
 
 st.title("🎬 Movie Recommender")
 
@@ -19,6 +20,7 @@ if st.session_state.logged_in:
         st.session_state.logged_in = False
         st.session_state.username = None
         st.session_state.user_id = None
+        st.session_state.movielens_user_id = None
         st.rerun()
 
 else:
@@ -37,6 +39,7 @@ else:
                     st.session_state.logged_in = True
                     st.session_state.username = data["username"]
                     st.session_state.user_id = data["id"]
+                    st.session_state.movielens_user_id = data["movielens_user_id"]
                     st.rerun()
                 else:
                     st.error(response.json().get("detail", "Login failed. Please try again."))
